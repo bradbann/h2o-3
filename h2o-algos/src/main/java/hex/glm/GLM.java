@@ -243,11 +243,27 @@ public class GLM extends ModelBuilder<GLMModel,GLMParameters,GLMOutput> {
     private ArrayList<Double> _objectives = new ArrayList<>();
     private ArrayList<Double> _convergence = new ArrayList<>(); // HGLM: ratio of sum(eta0-eta.i)^2/sum(eta.i^2)
     private ArrayList<Double> _sumEtaiSquare = new ArrayList<>();  // HGLM: sum(eta.i^2)
+    private ArrayList<Double> _lambdas = new ArrayList<>();
+    private ArrayList<Integer> _lambdaIters = new ArrayList<>();
+    private ArrayList<Integer> _lambdaPredictors = new ArrayList<>();
+    private ArrayList<Double> _lambdaDevTrain = new ArrayList<>();
+    private ArrayList<Double> _lambdaDevTest;
+    private ArrayList<Double> _lambdaDevXval;
+    private ArrayList<Double> _lambdaDevXvalSE;
+    private ArrayList<Double> _alphas = new ArrayList<>();
     
     public ArrayList<Integer> getScoringIters() { return _scoringIters;}
     public ArrayList<Long> getScoringTimes() { return _scoringTimes;}
     public ArrayList<Double> getLikelihoods() { return _likelihoods;}
     public ArrayList<Double> getObjectives() { return _objectives;}
+
+    public ScoringHistory(boolean hasTest, boolean hasXval) {
+      if(hasTest || true)_lambdaDevTest = new ArrayList<>();
+      if(hasXval){
+        _lambdaDevXval = new ArrayList<>();
+        _lambdaDevXvalSE = new ArrayList<>();
+      }
+    }
     
     public synchronized void addIterationScore(int iter, double likelihood, double obj) {
       if (_scoringIters.size() > 0 && _scoringIters.get(_scoringIters.size() - 1) == iter)
@@ -579,7 +595,7 @@ public class GLM extends ModelBuilder<GLMModel,GLMParameters,GLMOutput> {
       if (_parms._lambda_search  &&_parms._nlambdas == -1)
           _parms._nlambdas = _parms._alpha[0] == 0?30:100; // fewer lambdas needed for ridge
       _lambdaSearchScoringHistory = new LambdaSearchScoringHistory(_parms._valid != null,_parms._nfolds > 1);
-      _scoringHistory = new ScoringHistory();
+      _scoringHistory = new ScoringHistory(_parms._valid != null,_parms._nfolds > 1);
       _train.bulkRollups(); // make sure we have all the rollups computed in parallel
       _t0 = System.currentTimeMillis();
       if ((_parms._lambda_search || !_parms._intercept || _parms._lambda == null || _parms._lambda[0] > 0) && !_parms._HGLM)
