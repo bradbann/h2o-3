@@ -24,14 +24,26 @@ def test_glm_scoring_history_multinomial():
     train = splits_frames[0]
     valid = splits_frames[1]
 
-    print("Building model with score_each_iteration turned on.")
-    h2o_model_score_each = glm(family="multinomial", score_each_iteration=True)
+    print("Building model with score_each_iteration turned on, with lambda search.")
+    h2o_model_score_each = glm(family="multinomial", score_each_iteration=True, lambda_search=True, nlambdas=10)
     h2o_model_score_each.train(x=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], y="C11", training_frame=train,
                                   validation_frame=valid)
     print("Building model with score_interval=1.  Should generate same model as score_each_iteration turned on.")
-    h2o_model = glm(family="multinomial", score_iteration_interval=1)
+    h2o_model = glm(family="multinomial", score_iteration_interval=1, lambda_search=True, nlambdas=10)
     h2o_model.train(x=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], y="C11", training_frame=train,
                                validation_frame=valid)
+
+    print("Building model with score_each_iteration turned on, with lambda search and CV.")
+    h2o_model_score_each_cv = glm(family="multinomial", score_each_iteration=True, lambda_search=True, nlambdas=10, 
+                               nfolds=2, fold_assignment='modulo')
+    h2o_model_score_each_each_cv.train(x=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], y="C11", training_frame=train,
+                           validation_frame=valid)
+    print("Building model with score_interval=1.  Should generate same model as score_each_iteration turned on, with "
+          "lambda search and CV.")
+    h2o_model_cv = glm(family="multinomial", score_iteration_interval=1, lambda_search=True, nlambdas=10, nfolds=2, 
+                    fold_assignment='modulo')
+    h2o_model_cv.train(x=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], y="C11", training_frame=train,
+                validation_frame=valid)
     print("Done")
 
 if __name__ == "__main__":
