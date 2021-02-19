@@ -1503,6 +1503,7 @@ public abstract class GLMTask  {
     final double [] _ymu;
     long _nobs;
     public double _likelihood;
+    public double _deviance;  // only needed for tweedie and negativebinomial family
     private transient GLMWeights _w;
     private transient GLMWeightsFun _glmfTweedie; // only needed for Tweedie
     //    final double _lambda;
@@ -1569,11 +1570,13 @@ public abstract class GLMTask  {
         else
           _glmf.computeWeights(y, r.innerProduct(_beta) + _sparseOffset, r.offset, r.weight, _w);
         w = _w.w; // hessian without the xij xik part
-        if (_glmf._family.equals(Family.tweedie))  // already multiplied with w for w.z
+        if (Family.tweedie.equals(_glmf._family))  // already multiplied with w for w.z
           wz = _w.z;
         else
           wz = w*_w.z;
         _likelihood += _w.l;
+        if (Family.tweedie.equals(_glmf._family) || Family.negativebinomial.equals(_glmf._family))
+          _deviance += _w.dev;
       } else {
         w = r.weight;
         wz = w*(y - r.offset);
@@ -1603,6 +1606,8 @@ public abstract class GLMTask  {
       wsum += git.wsum;
       wsumu += git.wsumu;
       _likelihood += git._likelihood;
+      if (Family.tweedie.equals(_glmf._family) || Family.negativebinomial.equals(_glmf._family))
+        _deviance += git._deviance;
       _sumsqe += git._sumsqe;
       _yy += git._yy;
       super.reduce(git);

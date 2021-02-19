@@ -2515,7 +2515,7 @@ public class GLM extends ModelBuilder<GLMModel,GLMParameters,GLMOutput> {
     public boolean progress(double [] beta, double likelihood) {
       _state._iter++;
       _state.updateState(beta,likelihood);
-      if(!_parms._lambda_search)
+      if(!_parms._lambda_search || _parms._generate_scoring_history)
         updateProgress(true);
       boolean converged = !_earlyStopEnabled && _state.converged();
       if(converged) Log.info(LogMsg(_state.convergenceMsg));
@@ -2538,8 +2538,11 @@ public class GLM extends ModelBuilder<GLMModel,GLMParameters,GLMOutput> {
     }
     // update user visible progress
     protected void updateProgress(boolean canScore){
-      assert !_parms._lambda_search;
-      _scoringHistory.addIterationScore(_state._iter, _state.likelihood(), _state.objective());
+      assert !_parms._lambda_search || _parms._generate_scoring_history;
+/*      if (_parms._lambda_search)
+        _lambdaSearchScoringHistory.addLambdaScore();
+      else*/
+        _scoringHistory.addIterationScore(_state._iter, _state.likelihood(), _state.objective());
       _job.update(_workPerIteration,_state.toString());
       if(canScore && (_parms._score_each_iteration || timeSinceLastScoring() > _scoringInterval)) {
         _model.update(_state.expandBeta(_state.beta()), -1, -1, _state._iter);

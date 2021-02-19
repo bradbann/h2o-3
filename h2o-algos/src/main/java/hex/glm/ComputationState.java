@@ -40,6 +40,7 @@ public final class ComputationState {
   private double _lambdaMax = Double.NaN;
   private GLMGradientInfo _ginfo; // gradient info excluding l1 penalty
   private double _likelihood;
+  private double _deviance; // only valid when family = tweedie and negativebinomial
   private double _gradientErr;
   private boolean _lambdaNull; // true if lambda was not provided by user
   private double _gMax; // store max value of original gradient without dividing by math.max(1e-2, _parms._alpha[0])
@@ -781,6 +782,7 @@ public final class ComputationState {
     private double [] grads;
     public double yy;
     public final double likelihood;
+    public final double deviance;
 
 
 
