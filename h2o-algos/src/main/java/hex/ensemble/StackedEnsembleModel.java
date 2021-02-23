@@ -137,6 +137,7 @@ public class StackedEnsembleModel extends Model<StackedEnsembleModel,StackedEnse
    */
   @Override
   protected Frame predictScoreImpl(Frame fr, Frame adaptFrm, String destination_key, Job j, boolean computeMetrics, CFuncRef customMetricFunc) {
+    assert _parms._fold_column == _parms._metalearner_fold_column : "fold_column must match metalearner_fold_column";
     final String seKey = this._key.toString();
     Frame levelOneFrame = new Frame(Key.<Frame>make("preds_levelone_" + seKey + fr._key));
 
@@ -456,6 +457,8 @@ public class StackedEnsembleModel extends Model<StackedEnsembleModel,StackedEnse
 
     if (null != _parms._metalearner_fold_column && 0 != _parms._metalearner_nfolds)
       throw new H2OIllegalArgumentException("Cannot specify fold_column and nfolds at the same time.");
+
+    _parms._fold_column = _parms._metalearner_fold_column;
 
     Model aModel = null;
     boolean retrievedFirstModelParams = false;
